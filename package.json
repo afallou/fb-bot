@@ -1,0 +1,23 @@
+{
+  "name": "fb-bot",
+  "version": "1.0.0",
+  "description": "Beeyond's facebook messenger bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beeyond/fb-bot.git"
+  },
+  "author": "Beeyond Inc.",
+  "license": "UNLICENSED",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/beeyond/fb-bot/issues"
+  },
+  "homepage": "https://github.com/beeyond/fb-bot#readme",
+  "dependencies": {
+    "messenger-bot": "^2.2.0"
+  }
+}
