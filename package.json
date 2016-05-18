@@ -18,6 +18,10 @@
   },
   "homepage": "https://github.com/beeyond/fb-bot#readme",
   "dependencies": {
-    "messenger-bot": "^2.2.0"
+    "messenger-bot": "^2.2.0",
+    "mongodb": "^2.1.19",
+    "node-uuid": "^1.4.7",
+    "node-wit": "^3.3.1",
+    "unirest": "^0.5.0"
   }
 }
