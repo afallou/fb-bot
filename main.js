@@ -1,44 +1,47 @@
 'use strict';
 var http = require('http');
-var Bot = require('messenger-bot');
-var Handler = require('./handler');
-var handler = new Handler();
+var Botkit = require('botkit');
 var config = require('./config');
-var answerTree = require('./answer-tree');
-
-var mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-mongoose.connect(config.mongoURI);
-
-let bot = new Bot({
-  token: config.fbPageToken,
-  verify: 'VERIFY_TOKEN',
-  secret: 'APP_SECRET'
-});
-
+var AT = require('./answer-tree');
 var WitClient = require('./wit-client');
-var wit = new WitClient(bot);
 
-bot.on('error', (err) => {
-  console.error(err.message)
+var MongoClient = require('mongodb').MongoClient;
+MongoClient.connect(config.mongoURI, (err, dbConn) => {
+  if (err){
+    console.error(`Error connecting to the database: ${err}`);
+  } else {
+    global.db = dbConn;
+    console.log('Database connected');
+  }
 });
 
-bot.on('message', (payload, reply) => {
-  console.log(`Got message ${payload.message.text}`);
+let controller = Botkit.facebookbot({
+  debug: true,
+  access_token: config.fbPageToken,
+  verify_token: 'VERIFY_TOKEN'
+});
+
+
+controller.hears(['hello', 'hi'], 'message_received', (bot, message) => {
+  bot.reply(message, 'Hi there');
+});
+
+controller.on('message_received', (bot, message) => {
+  console.log(`Got message ${message.text}`);
 
   // We have a first rule-based layer handling some simple cases
-  let treeReplyProm = answerTree.tryHandleReply(payload.sender.id, payload.message.text);
+  let treeReplyProm = answerTree.tryHandleReply(message.user, message.text);
   treeReplyProm
     .then(treeReply => {
     if (treeReply){
-      reply(treeReply, err => {
+      bot.reply(message, treeReply, (err, resp) => {
         if (err){
           console.error(err);
         }
       });
     } else {
       // The simple rules didn't give an answer >> second layer is using a conversational API
-      wit.handleMessage(payload.message.text, parseInt(payload.sender.id));
+      wit.handleMessage(message.text, parseInt(message.user));
     }
   })
     .catch(err => {
@@ -46,11 +49,24 @@ bot.on('message', (payload, reply) => {
     });
 });
 
-bot.on('postback', (payload, reply) => {
-  let postbackReply = answerTree.handlePostback(payload.postback.payload);
-
-  reply(postbackReply, (err, info) => {});
+controller.on('tick', (bot,message) => {
 });
 
-http.createServer(bot.middleware()).listen(3000);
-console.log('Echo bot server running at port 3000.');
+controller.on('facebook_postback', (bot, message) => {
+  let postbackReply = answerTree.handlePostback(message.user, message.payload);
+
+  bot.reply(message, postbackReply);
+});
+
+var bot = controller.spawn({
+});
+
+var wit = new WitClient(controller);
+var answerTree = new AT(bot);
+
+let port = process.env.port || 3000;
+controller.setupWebserver(port, function(err, webserver) {
+  controller.createWebhookEndpoints(webserver, bot, function() {
+    console.log(`Echo bot server running at port ${port}`);
+  });
+});

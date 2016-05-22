@@ -20,32 +20,6 @@
           ]
         }
       }
-    },
-    "helpChoice": {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "button",
-          "text": "Sounds good. What do you need help with?",
-          "buttons": [
-            {
-              "type": "postback",
-              "title": "Job offers",
-              "payload": "help.jobOffers"
-            },
-            {
-              "type": "postback",
-              "title": "Networking opportunities",
-              "payload": "help.networking"
-            },
-            {
-              "type": "postback",
-              "title": "Something else",
-              "payload": "help.other"
-            }
-          ]
-        }
-      }
     }
   },
   "postbackReplies": {
@@ -53,44 +27,95 @@
         {
           "text": "Sucks to be you."
         }
-    ]
-    },
+    ],
     "corporateYes": [
       {
-        "text": "Great! What is your code?"
+        "reply": {
+          "text": "Great! What is your code?"
+        }
       }
     ],
     "help.jobOffers": [
       {
-        "text": "Which city?"
+        "type": "location",
+        "reply": {
+          "text": "Which city?"
+        }
       },
       {
-        "text": "Which industry?"
+        "type": "role",
+        "reply": {
+          "text": "Which function?"
+        }
       },
       {
-        "text": "Which function?"
-      },
-      {
-        "text": "Ok, let me look that up."
+        "type": "end",
+        "reply": {
+          "text": "Ok, let me look that up."
+        }
       }
     ],
     "help.networking": [
       {
-        "text": "I see. Where are you located?"
+        "type": "location",
+        "reply": {
+          "text": "I see. Where are you located?"
+        }
       },
       {
-        "text": "What industry are you targeting?"
+        "type": "industry",
+        "reply": {
+          "text": "What industry are you targeting?"
+        }
       },
       {
-        "text": "Ok, let me look that up"
+        "type": "end",
+        "reply": {
+          "text": "Ok, let me look that up"
+        }
       }
     ],
     "help.other": [
       {
-        "text": "What can I help you with?"
+        "reply": {
+          "text": "What can I help you with?"
+        }
       },
       {
-        "text": "I see. I'm going to have to find a smarter bot - give me a minute"
+        "reply": {
+          "text": "I see. I'm going to have to find a smarter bot - give me a minute"
+        }
+      }
+    ],
+    "root": [
+      {
+        "reply":
+        {
+          "attachment": {
+            "type": "template",
+            "payload": {
+              "template_type": "button",
+              "text": "Sounds good. What do you need help with?",
+              "buttons": [
+                {
+                  "type": "postback",
+                  "title": "Job offers",
+                  "payload": "help.jobOffers"
+                },
+                {
+                  "type": "postback",
+                  "title": "Networking opportunities",
+                  "payload": "help.networking"
+                },
+                {
+                  "type": "postback",
+                  "title": "Something else",
+                  "payload": "help.other"
+                }
+              ]
+            }
+          }
+        }
       }
     ]
   }
