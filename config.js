@@ -7,7 +7,7 @@ var config = {
   witaiToken: process.env['WITAI_TOKEN']
 };
 
-config.mongoURI = process.env['MONGO_URL'] || 'mongodb://localhost:27017/test';
+config.mongoURI = process.env['MONGODB_URI'] || 'mongodb://localhost:27017/test';
 
 
 module.exports = config;
