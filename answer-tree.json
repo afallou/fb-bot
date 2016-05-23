@@ -25,7 +25,7 @@
   "postbackReplies": {
     "corporateNo": [
         {
-          "text": "Sucks to be you."
+          "text": "You have been added to our waitlist."
         }
     ],
     "corporateYes": [
@@ -82,20 +82,21 @@
         }
       },
       {
+        "type": "end",
         "reply": {
-          "text": "I see. I'm going to have to find a smarter bot - give me a minute"
+          "text": "I see. I don't think I'm smart enough for that."
         }
       }
     ],
     "root": [
       {
-        "reply":
-        {
+        "type": "choice",
+        "reply": {
           "attachment": {
             "type": "template",
             "payload": {
               "template_type": "button",
-              "text": "Sounds good. What do you need help with?",
+              "text": "What do you need help with?",
               "buttons": [
                 {
                   "type": "postback",
@@ -115,6 +116,39 @@
               ]
             }
           }
+        }
+      }
+    ],
+    "startOver": [
+      {
+        "type": "choice",
+        "reply": {
+          "attachment": {
+            "type": "template",
+            "payload": {
+              "template_type": "button",
+              "text": "Can I help you with something else?",
+              "buttons": [
+                {
+                  "type": "postback",
+                  "title": "Yes",
+                  "payload": "root"
+                },
+                {
+                  "type": "postback",
+                  "title": "No",
+                  "payload": "goodbye"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "goodbye": [
+      {
+        "reply": {
+          "text": "Alright, see you soon!"
         }
       }
     ]

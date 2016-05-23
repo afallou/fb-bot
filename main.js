@@ -21,11 +21,6 @@ let controller = Botkit.facebookbot({
   verify_token: 'VERIFY_TOKEN'
 });
 
-
-controller.hears(['hello', 'hi'], 'message_received', (bot, message) => {
-  bot.reply(message, 'Hi there');
-});
-
 controller.on('message_received', (bot, message) => {
   console.log(`Got message ${message.text}`);
 

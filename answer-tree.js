@@ -15,27 +15,29 @@ module.exports = class AnswerTree {
   tryHandleReply(clientUserId, message){
     let uz;
     return user.getUser(clientUserId)
-      .then(result => {
-        if (!result){
-          uz = user.addUser(clientUserId);
-          user.enterBranch(clientUserId, 'root');
+      .then(uz => {
+        if (!uz){
+          user.addUser(clientUserId);
           return tree.postbackReplies['root'][0].reply;
         } else {
-          uz = result;
+          if (uz.stateBranch === 'help.jobOffers' ||  uz.stateBranch === 'help.networking') {
+            this.updateQuery(uz, clientUserId, message);
 
-          this.updateQuery(uz, clientUserId, message);
+            let replyType = tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type;
+            if (replyType === 'end') {
+              this.executeQuery(uz.stateBranch, uz.query, clientUserId);
+              user.enterBranch(clientUserId, 'root');
+            }
+          }
           user.nextBranchStep(clientUserId);
-
-          let replyType = tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type;
-          if (replyType === 'end'){
-            this.executeQuery(uz.stateBranch, uz.query, clientUserId);
-            user.enterBranch(clientUserId, 'root');
+          if (uz.stateBranch === 'help.other' && tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type === 'end'){
+            this.startOver(clientUserId);
           }
           return tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].reply;
         }
       })
       .catch(err => {
-        console.error(err);
+        console.error(err.stack);
       });
   }
 
@@ -66,8 +68,9 @@ module.exports = class AnswerTree {
   }
 
   executeQuery(stateBranch, query, clientUserId){
+    var prom;
     if (stateBranch === 'help.jobOffers'){
-      Jobs.getJobs(query.role, query.location)
+      prom = Jobs.getJobs(query.role, query.location)
         .then(out => {
           this.bot.say({
             text: out,
@@ -76,7 +79,7 @@ module.exports = class AnswerTree {
         });
     }
     else if (stateBranch === 'help.networking'){
-      Events.getEvents(query.industry, query.location)
+     prom =  Events.getEvents(query.industry, query.location)
         .then(out => {
           this.bot.say({
             text: out,
@@ -84,6 +87,20 @@ module.exports = class AnswerTree {
           });
         });
     }
+
+    prom
+      .then(() => {
+        this.startOver(clientUserId);
+      });
+  }
+
+
+  startOver(clientUserId){
     user.enterBranch(clientUserId, 'root');
+    setTimeout(() => {
+      var replyObj = {channel: clientUserId};
+      Object.assign(replyObj, tree.postbackReplies['startOver'][0].reply);
+      this.bot.say(replyObj);
+    }, 3000);
   }
 };
