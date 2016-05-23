@@ -59,7 +59,7 @@ var bot = controller.spawn({
 var wit = new WitClient(controller);
 var answerTree = new AT(bot);
 
-let port = process.env.port || 3000;
+let port = process.env.PORT || 3000;
 controller.setupWebserver(port, function(err, webserver) {
   controller.createWebhookEndpoints(webserver, bot, function() {
     console.log(`Echo bot server running at port ${port}`);
