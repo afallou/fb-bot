@@ -115,7 +115,7 @@ module.exports = class AnswerTree {
   }
 
   /**
-   * Start again: the user said they needed something else
+   * Start again: ask the user if they need something else
    * @param {string} clientUserId
    */
   startOver(clientUserId){
