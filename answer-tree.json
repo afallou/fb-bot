@@ -151,6 +151,13 @@
           "text": "Alright, see you soon!"
         }
       }
+    ],
+    "noResult": [
+      {
+        "reply": {
+          "text": "I'm sorry, but I couldn't find anything"
+        }
+      }
     ]
   }
 }

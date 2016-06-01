@@ -88,18 +88,29 @@ module.exports = class AnswerTree {
     if (stateBranch === 'help.jobOffers'){
       prom = Jobs.getJobs(query.role, query.location)
         .then(out => {
-          Object.assign(out, {channel: clientUserId, text: ''});
-          this.bot.say(out);
+          if (out){
+            Object.assign(out, {channel: clientUserId, text: ''});
+            this.bot.say(out);
+          } else {
+            let reply = tree.postbackReplies['noResult'][0].reply;
+            Object.assign(reply, {channel: clientUserId});
+            this.bot.say(reply);
+          }
         });
     }
     else if (stateBranch === 'help.networking'){
-     prom =  Events.getEvents(query.industry, query.location)
+      prom =  Events.getEvents(query.industry, query.location)
         .then(out => {
-         Object.assign(out, {channel: clientUserId, text: ''});
-          this.bot.say(out);
+          if (out) {
+            Object.assign(out, {channel: clientUserId, text: ''});
+            this.bot.say(out);
+          } else {
+            let reply = tree.postbackReplies['noResult'][0].reply;
+            Object.assign(reply, {channel: clientUserId});
+            this.bot.say(reply);
+          }
         });
-    }
-
+      }
     return prom
   }
 

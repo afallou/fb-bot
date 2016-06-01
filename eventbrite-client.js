@@ -17,14 +17,18 @@ module.exports = class EventbriteClient{
         .end(response => {
           if (response.error){
             console.log(`Error: ${response.error}`);
+            reject();
           }
-          resolve(this.structureOutput(response.body) );
+          resolve(this.structureOutput(response.body));
         });
     });
   };
 
   static structureOutput(payload){
     let elems = [];
+    if (payload.events.length === 0){
+      return null;
+    }
     for (let result of payload.events.slice(0, 5)){
       elems.push({
         title: result.name.text,

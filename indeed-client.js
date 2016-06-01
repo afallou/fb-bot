@@ -25,6 +25,7 @@ module.exports = class IndeedClient{
         .end(response => {
           if (response.error){
             console.log(`Error: ${response.error}`);
+            reject();
           }
           // The body is a json string
           resolve(this.structureOutput(JSON.parse(response.body)));
@@ -34,6 +35,11 @@ module.exports = class IndeedClient{
 
   static structureOutput(payload){
     let elems = [];
+    if (payload.totalResults === 0){
+      return {
+
+      };
+    }
     for (let result of payload.results.slice(0, 5)){
       elems.push({
         title: result.jobtitle,
