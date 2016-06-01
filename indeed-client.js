@@ -27,8 +27,28 @@ module.exports = class IndeedClient{
             console.log(`Error: ${response.error}`);
           }
           // The body is a json string
-          resolve(JSON.parse(response.body).results[0].url);
+          resolve(this.structureOutput(JSON.parse(response.body)));
         });
     });
   };
+
+  static structureOutput(payload){
+    let elems = [];
+    for (let result of payload.results.slice(0, 5)){
+      elems.push({
+        title: result.jobtitle,
+        subtitle: result.company,
+        item_url: result.url
+      })
+    }
+    return {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          elements: elems
+        }
+      }
+    }
+  }
 };

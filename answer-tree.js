@@ -25,15 +25,24 @@ module.exports = class AnswerTree {
 
             let replyType = tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type;
             if (replyType === 'end') {
-              this.executeQuery(uz.stateBranch, uz.query, clientUserId);
+              this.executeQuery(uz.stateBranch, uz.query, clientUserId)
+                .then(() => {
+                  this.startOver(clientUserId);
+                });
               user.enterBranch(clientUserId, 'root');
             }
           }
-          user.nextBranchStep(clientUserId);
           if (uz.stateBranch === 'help.other' && tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type === 'end'){
             this.startOver(clientUserId);
           }
-          return tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].reply;
+          if (tree.postbackReplies[uz.stateBranch][uz.branchStep + 1]){
+            user.nextBranchStep(clientUserId);
+            return tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].reply;
+          } else {
+            //  We got ourselves into an unplanned step - start over.
+            user.enterBranch(clientUserId, 'root');
+            return tree.postbackReplies['root'][0].reply;
+          }
         }
       })
       .catch(err => {
@@ -48,7 +57,7 @@ module.exports = class AnswerTree {
   }
 
   /**
-   * The user sent a message that a reply to a question on part of their query (location, industry etc...)
+   * The user sent a message that is a reply to a question on part of their query (location, industry etc...)
    * We update the corresponding query element in the database
    * @param {object} userObject - User object from database
    * @param {string} clientUserId - Id of user for chat client
@@ -67,34 +76,37 @@ module.exports = class AnswerTree {
     }
   }
 
+  /**
+   * Once we got all the info we need to find the data the user is looking for,
+   * we actually get the data
+   * @param {string} stateBranch - Which branch the user is on (i.e. what kind of query)
+   * @param {object} query - Object containing the correct element (a subset of industry, role, location)
+   * @param {string} clientUserId
+   */
   executeQuery(stateBranch, query, clientUserId){
     var prom;
     if (stateBranch === 'help.jobOffers'){
       prom = Jobs.getJobs(query.role, query.location)
         .then(out => {
-          this.bot.say({
-            text: out,
-            channel: clientUserId
-          });
+          Object.assign(out, {channel: clientUserId, text: ''});
+          this.bot.say(out);
         });
     }
     else if (stateBranch === 'help.networking'){
      prom =  Events.getEvents(query.industry, query.location)
         .then(out => {
-          this.bot.say({
-            text: out,
-            channel: clientUserId
-          });
+         Object.assign(out, {channel: clientUserId, text: ''});
+          this.bot.say(out);
         });
     }
 
-    prom
-      .then(() => {
-        this.startOver(clientUserId);
-      });
+    return prom
   }
 
-
+  /**
+   * Start again: the user said they needed something else
+   * @param {string} clientUserId
+   */
   startOver(clientUserId){
     user.enterBranch(clientUserId, 'root');
     setTimeout(() => {

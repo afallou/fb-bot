@@ -1,5 +1,6 @@
 'use strict';
 var unirest = require('unirest');
+var moment = require('moment');
 var config = require('./config.js');
 
 module.exports = class EventbriteClient{
@@ -17,8 +18,28 @@ module.exports = class EventbriteClient{
           if (response.error){
             console.log(`Error: ${response.error}`);
           }
-          resolve(response.body.events[0].url);
+          resolve(this.structureOutput(response.body) );
         });
     });
   };
+
+  static structureOutput(payload){
+    let elems = [];
+    for (let result of payload.events.slice(0, 5)){
+      elems.push({
+        title: result.name.text,
+        subtitle: moment(result.start.local).format('lll'),
+        item_url: result.url
+      })
+    }
+    return {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          elements: elems
+        }
+      }
+    }
+  }
 };
