@@ -51,6 +51,12 @@ module.exports = class AnswerTree {
   }
 
 
+  /**
+   * A postback means we're entering a new branch of the tree
+   * @param {string} clientUserId
+   * @param {string} payload
+   * @returns {*|Array}
+   */
   handlePostback(clientUserId, payload){
     user.enterBranch(clientUserId, payload);
     return tree.postbackReplies[payload][0].reply;

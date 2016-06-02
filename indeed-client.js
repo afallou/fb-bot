@@ -36,9 +36,7 @@ module.exports = class IndeedClient{
   static structureOutput(payload){
     let elems = [];
     if (payload.totalResults === 0){
-      return {
-
-      };
+      return null;
     }
     for (let result of payload.results.slice(0, 5)){
       elems.push({
