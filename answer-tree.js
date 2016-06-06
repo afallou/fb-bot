@@ -18,12 +18,12 @@ module.exports = class AnswerTree {
       .then(uz => {
         if (!uz){
           user.addUser(clientUserId);
-          return tree.postbackReplies['root'][0].reply;
+          return tree.branches['root'][0].reply;
         } else {
           if (uz.stateBranch === 'help.jobOffers' ||  uz.stateBranch === 'help.networking') {
             this.updateQuery(uz, clientUserId, message);
 
-            let replyType = tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type;
+            let replyType = tree.branches[uz.stateBranch][uz.branchStep + 1].type;
             if (replyType === 'end') {
               this.executeQuery(uz.stateBranch, uz.query, clientUserId)
                 .then(() => {
@@ -32,16 +32,16 @@ module.exports = class AnswerTree {
               user.enterBranch(clientUserId, 'root');
             }
           }
-          if (uz.stateBranch === 'help.other' && tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].type === 'end'){
+          if (uz.stateBranch === 'help.other' && tree.branches[uz.stateBranch][uz.branchStep + 1].type === 'end'){
             this.startOver(clientUserId);
           }
-          if (tree.postbackReplies[uz.stateBranch][uz.branchStep + 1]){
+          if (tree.branches[uz.stateBranch][uz.branchStep + 1]){
             user.nextBranchStep(clientUserId);
-            return tree.postbackReplies[uz.stateBranch][uz.branchStep + 1].reply;
+            return tree.branches[uz.stateBranch][uz.branchStep + 1].reply;
           } else {
             //  We got ourselves into an unplanned step - start over.
             user.enterBranch(clientUserId, 'root');
-            return tree.postbackReplies['root'][0].reply;
+            return tree.branches['root'][0].reply;
           }
         }
       })
@@ -59,7 +59,7 @@ module.exports = class AnswerTree {
    */
   handlePostback(clientUserId, payload){
     user.enterBranch(clientUserId, payload);
-    return tree.postbackReplies[payload][0].reply;
+    return tree.branches[payload][0].reply;
   }
 
   /**
@@ -70,10 +70,10 @@ module.exports = class AnswerTree {
    * @param {string} replyText - Content of user's reply
    */
   updateQuery(userObject, clientUserId, replyText){
-    let messageType = tree.postbackReplies[userObject.stateBranch][userObject.branchStep].type;
+    let messageType = tree.branches[userObject.stateBranch][userObject.branchStep].type;
 
     if (messageType === 'location' || 'industry' || 'role'){
-      // Update in-memory object to keep it consistent with DB
+      // Update object to keep it consistent with DB
       if (!userObject.query){
         userObject.query = {};
       }
@@ -98,7 +98,7 @@ module.exports = class AnswerTree {
             Object.assign(out, {channel: clientUserId, text: ''});
             this.bot.say(out);
           } else {
-            let reply = tree.postbackReplies['noResult'][0].reply;
+            let reply = tree.branches['noResult'][0].reply;
             Object.assign(reply, {channel: clientUserId});
             this.bot.say(reply);
           }
@@ -111,7 +111,7 @@ module.exports = class AnswerTree {
             Object.assign(out, {channel: clientUserId, text: ''});
             this.bot.say(out);
           } else {
-            let reply = tree.postbackReplies['noResult'][0].reply;
+            let reply = tree.branches['noResult'][0].reply;
             Object.assign(reply, {channel: clientUserId});
             this.bot.say(reply);
           }
@@ -128,7 +128,7 @@ module.exports = class AnswerTree {
     user.enterBranch(clientUserId, 'root');
     setTimeout(() => {
       var replyObj = {channel: clientUserId};
-      Object.assign(replyObj, tree.postbackReplies['startOver'][0].reply);
+      Object.assign(replyObj, tree.branches['startOver'][0].reply);
       this.bot.say(replyObj);
     }, 3000);
   }
