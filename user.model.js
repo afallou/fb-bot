@@ -5,9 +5,13 @@ var config = require('./config');
 
 module.exports = {
 
-  addUser: (facebookId) => {
+  addUser: (facebookId, stateBranch, branchStep) => {
     return new Promise((resolve, reject) => {
-      global.db.collection('users').insertOne({'fbUserId': facebookId}, (err, result) => {
+      global.db.collection('users').insertOne({
+        'fbUserId': facebookId,
+        'stateBranch': stateBranch,
+        'branchStep': branchStep
+      }, (err, result) => {
         if (err){
           console.error(err);
           reject();

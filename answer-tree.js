@@ -1,7 +1,8 @@
 'use strict';
+var Rx = require('rx');
+
 var user = require('./user.model');
 var tree = require('./answer-tree.json');
-
 var Jobs = require('./indeed-client.js');
 var Events = require('./eventbrite-client.js');
 
@@ -13,11 +14,10 @@ module.exports = class AnswerTree {
   }
 
   tryHandleReply(clientUserId, message){
-    let uz;
-    return user.getUser(clientUserId)
+    let prom = user.getUser(clientUserId)
       .then(uz => {
         if (!uz){
-          user.addUser(clientUserId);
+          user.addUser(clientUserId, 'root', 0);
           return tree.branches['root'][0].reply;
         } else {
           if (uz.stateBranch === 'help.jobOffers' ||  uz.stateBranch === 'help.networking') {
@@ -48,6 +48,8 @@ module.exports = class AnswerTree {
       .catch(err => {
         console.error(err.stack);
       });
+
+    return Rx.Observable.fromPromise(prom);
   }
 
 
