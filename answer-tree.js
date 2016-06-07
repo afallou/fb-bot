@@ -1,5 +1,4 @@
 'use strict';
-var Rx = require('rx');
 
 var user = require('./user.model');
 var tree = require('./answer-tree.json');
@@ -14,7 +13,7 @@ module.exports = class AnswerTree {
   }
 
   tryHandleReply(clientUserId, message){
-    let prom = user.getUser(clientUserId)
+    return user.getUser(clientUserId)
       .then(uz => {
         if (!uz){
           user.addUser(clientUserId, 'root', 0);
@@ -48,8 +47,6 @@ module.exports = class AnswerTree {
       .catch(err => {
         console.error(err.stack);
       });
-
-    return Rx.Observable.fromPromise(prom);
   }
 
 

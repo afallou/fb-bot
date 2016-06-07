@@ -1,6 +1,8 @@
 'use strict';
 var http = require('http');
 var Botkit = require('botkit');
+var Rx = require('rx');
+
 var config = require('./config');
 var AT = require('./answer-tree');
 var WitClient = require('./wit-client');
@@ -21,28 +23,25 @@ let controller = Botkit.facebookbot({
   verify_token: 'VERIFY_TOKEN'
 });
 
-controller.on('message_received', (bot, message) => {
-  console.log(`Got message ${message.text}`);
+var onBot = Rx.Observable.fromCallback(controller.on, controller);
 
-  // We have a first rule-based layer handling some simple cases
-  let treeReplyProm = answerTree.tryHandleReply(message.user, message.text);
-  treeReplyProm
-    .then(treeReply => {
-    if (treeReply){
-      bot.reply(message, treeReply, (err, resp) => {
-        if (err){
-          console.error(err);
-        }
-      });
-    } else {
-      // The simple rules didn't give an answer >> second layer is using a conversational API
-      wit.handleMessage(message.text, parseInt(message.user));
-    }
+var messageSource = onBot('message_received')
+  .flatMap(incoming => {
+    let bot = incoming[0];
+    let message = incoming[1];
+    let reply = Rx.Observable.fromPromise(answerTree.tryHandleReply(message.user, message.text));
+    return Rx.Observable.zip(Rx.Observable.from([bot]), reply, Rx.Observable.from([message]));
   })
-    .catch(err => {
-      console.error(err);
+  .do(replyArr => {
+    // We get an array of objects in the same order as in the above observable: [bot, reply, message]
+    replyArr[0].reply(replyArr[2], replyArr[1], (err, resp) => {
+      if (err){
+        console.error(err);
+      }
     });
-});
+  });
+
+messageSource.subscribe();
 
 controller.on('tick', (bot,message) => {
 });

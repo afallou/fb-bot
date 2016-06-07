@@ -22,7 +22,7 @@
       }
     }
   },
-  "postbackReplies": {
+  "branches": {
     "corporateNo": [
         {
           "text": "You have been added to our waitlist."
